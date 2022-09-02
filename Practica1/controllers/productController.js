@@ -71,7 +71,7 @@ exports.updateProductById=(req,res)=> {
         const index=products.findIndex(p => p.id==req.params.id);
         products[index].name=req.body.name;
         products[index].price=req.body.price;
-        products[index].cat1=req.body.cat1;
+        products[index].category=req.body.category;
 
         fs.writeFileSync(`${__dirname}/../data/products.json`,JSON.stringify(products));
         res.status(200).json({
