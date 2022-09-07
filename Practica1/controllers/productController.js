@@ -1,8 +1,10 @@
 const fs = require("fs");
+const Product = require("../models/Product");
+const mongoose = require("mongoose");
 
-exports.getAllProducts =(req,res)=> {
-    const products=JSON.parse(fs.readFileSync(`${__dirname}/../data/products.json`));
-    console.log(req.requestTime);
+exports.getAllProducts = async(req,res)=> { //ahora tienen que ser asyncronas
+
+    const products= await Product.find(); //con el await por lo de asincrono
     res.status(200).json({
         status:"success",
         timeOfRequest: req.requestTime,
@@ -12,25 +14,22 @@ exports.getAllProducts =(req,res)=> {
         }
     });
 }
-exports.addProduct=(req,res)=> {
-    const products=JSON.parse(fs.readFileSync(`${__dirname}/../data/products.json`));
-    products.push(req.body);
-    fs.writeFileSync(`${__dirname}/../data/products.json`,JSON.stringify(products));
+exports.addProduct= async(req,res)=> {
+    const newProduct = await Product.create(req.body);
     res.status(200).json({
         status:"success",
         data:{
-            products
+            product:newProduct
         }
     });
 }
-exports.getProductById=(req,res)=> {
-    const products=JSON.parse(fs.readFileSync(`${__dirname}/../data/products.json`));
-    const foundproduct=products.find(p=> p.id==req.params.id);
-    if(foundproduct){
+exports.getProductById=async(req,res)=> {
+    const foundProduct= await Product.findById(req.params.id);
+    if(foundProduct){
         res.status(200).json({
             status:"success",
             data:{
-                product: foundproduct
+                product: foundProduct
             }
         });
     }
@@ -41,51 +40,28 @@ exports.getProductById=(req,res)=> {
     }
 }
 
-exports.deleteProductById=(req,res)=> {
-    const products=JSON.parse(fs.readFileSync(`${__dirname}/../data/products.json`));
-    const foundproduct=products.find(p=> p.id==req.params.id);
-    if(foundproduct){
-        const index=products.findIndex(p => p.id==req.params.id);
-        products.splice(index,1);  
-        fs.writeFileSync(`${__dirname}/../data/products.json`,JSON.stringify(products));
-        res.status(200).json({
-            status:"success",
-            data:{
-                idDeleted:req.params.id,
-                product: products
-            }
-        });
-
-    }
-    else{
-        res.status(404).json({
-            status:"element not found to delete",
-        });
-    }
+exports.deleteProductById=async (req,res)=> {
+    const deletedProduct= await Product.findByIdAndDelete(req.params.id);
+    res.status(200).json({
+        status:"success",
+        data:{
+            idDeleted:req.params.id,
+            productDeleted:deletedProduct
+        }
+    });
 }
 
-exports.updateProductById=(req,res)=> {
-    const products=JSON.parse(fs.readFileSync(`${__dirname}/../data/products.json`));
-    const foundproduct=products.find(p=> p.id==req.params.id);
-    if(foundproduct){
-        const index=products.findIndex(p => p.id==req.params.id);
-        products[index].name=req.body.name;
-        products[index].price=req.body.price;
-        products[index].category=req.body.category;
-
-        fs.writeFileSync(`${__dirname}/../data/products.json`,JSON.stringify(products));
-        res.status(200).json({
-            status:"success",
-            data:{
+exports.updateProductById=async(req,res)=> {
+    
+    const foundProduct= await Product.findByIdAndUpdate(req.params.id,req.body,{
+        new: true
+    });
+    res.status(200).json({
+        status:"success",
+        data:{
                 idUpdated:req.params.id,
-                productChanged: products[index]
+                updatedProduct:foundProduct,
             }
-        });
+    });
 
-    }
-    else{
-        res.status(404).json({
-            status:"element not found to update",
-        });
-    }
 }
