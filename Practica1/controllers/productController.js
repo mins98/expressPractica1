@@ -1,10 +1,10 @@
 const fs = require("fs");
-const Product = require("../models/Product");
-const mongoose = require("mongoose");
+const {Product} = require("../models");
 
-exports.getAllProducts = async(req,res)=> { //ahora tienen que ser asyncronas
 
-    const products= await Product.find(); //con el await por lo de asincrono
+exports.getAllProducts = async(req,res)=> { 
+
+    const products= await Product.findAll(); 
     res.status(200).json({
         status:"success",
         timeOfRequest: req.requestTime,
@@ -15,7 +15,9 @@ exports.getAllProducts = async(req,res)=> { //ahora tienen que ser asyncronas
     });
 }
 exports.addProduct= async(req,res)=> {
-    const newProduct = await Product.create(req.body);
+
+    let newProduct =  Product.build(req.body);
+    newProduct=await newProduct.save();
     res.status(200).json({
         status:"success",
         data:{
@@ -24,7 +26,7 @@ exports.addProduct= async(req,res)=> {
     });
 }
 exports.getProductById=async(req,res)=> {
-    const foundProduct= await Product.findById(req.params.id);
+    const foundProduct= await Product.findByPk(req.params.id);
     if(foundProduct){
         res.status(200).json({
             status:"success",
