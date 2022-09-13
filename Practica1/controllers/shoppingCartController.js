@@ -113,7 +113,6 @@ exports.deleteProductToShopById= catchAsync( async(req,res)=> {
    
 });
 
-
 exports.payShop=catchAsync( async(req,res)=> {
     const user=req.user.userName;
     const shoppingCart= await ShoppingCart.find({status: 'PENDING'},{user:user})
@@ -154,3 +153,39 @@ exports.payShop=catchAsync( async(req,res)=> {
         });
     }
 });
+
+exports.getShopCart = catchAsync( async(req,res)=> { 
+    const user=req.user.userName;
+    const shoppingCart= await ShoppingCart.find({status: 'PENDING'},{user:user})
+    if(shoppingCart.length==1){
+        const shopId=shoppingCart[0]._id;
+        let shoppingCartUp=await ShoppingCart.findById(shopId);
+        res.status(200).json({
+            status:"success",
+            timeOfRequest: req.requestTime,
+            data:{
+                ShoppingCart:shoppingCartUp
+            }
+        });
+    }
+    else if(shoppingCart.length==0){
+        res.status(404).json({
+            status:"shopping cart not found",
+        });
+    }
+    else{
+        res.status(500).json({
+            status:"There is more than one active shopping cart",
+        });
+    }
+    
+    res.status(200).json({
+        status:"success",
+        timeOfRequest: req.requestTime,
+        results: products.length,
+        data:{
+            products
+        }
+    });
+});
+

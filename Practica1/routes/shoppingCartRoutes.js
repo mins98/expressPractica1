@@ -7,4 +7,5 @@ const shoppingCartRouter = express.Router();
 shoppingCartRouter.route("/product").all(authController.protect).post(shoppingCartController.addProductToShop);
 shoppingCartRouter.route("/product/:id").all(authController.protect).delete(shoppingCartController.deleteProductToShopById);
 shoppingCartRouter.route("/pay").all(authController.protect).post(shoppingCartController.payShop);
+shoppingCartRouter.route("/").all(authController.protect).get(shoppingCartController.getShopCart);
 module.exports = shoppingCartRouter;
