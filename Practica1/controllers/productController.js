@@ -1,10 +1,9 @@
-const fs = require("fs");
 const Product = require("../models/Product");
 const mongoose = require("mongoose");
+const catchAsync = require("../utils/catchAsync");
 
-exports.getAllProducts = async(req,res)=> { //ahora tienen que ser asyncronas
-
-    const products= await Product.find(); //con el await por lo de asincrono
+exports.getAllProducts = catchAsync( async(req,res)=> { 
+    const products= await Product.find(); 
     res.status(200).json({
         status:"success",
         timeOfRequest: req.requestTime,
@@ -13,8 +12,9 @@ exports.getAllProducts = async(req,res)=> { //ahora tienen que ser asyncronas
             products
         }
     });
-}
-exports.addProduct= async(req,res)=> {
+});
+
+exports.addProduct= catchAsync( async(req,res)=> {
     const newProduct = await Product.create(req.body);
     res.status(200).json({
         status:"success",
@@ -22,8 +22,9 @@ exports.addProduct= async(req,res)=> {
             product:newProduct
         }
     });
-}
-exports.getProductById=async(req,res)=> {
+});
+
+exports.getProductById=catchAsync( async(req,res)=> {
     const foundProduct= await Product.findById(req.params.id);
     if(foundProduct){
         res.status(200).json({
@@ -38,30 +39,43 @@ exports.getProductById=async(req,res)=> {
             status:"not found",
         });
     }
-}
+});
 
-exports.deleteProductById=async (req,res)=> {
+exports.deleteProductById=catchAsync( async (req,res)=> {
     const deletedProduct= await Product.findByIdAndDelete(req.params.id);
-    res.status(200).json({
-        status:"success",
-        data:{
-            idDeleted:req.params.id,
-            productDeleted:deletedProduct
-        }
-    });
-}
+    if(deletedProduct){
+        res.status(200).json({
+            status:"success",
+            data:{
+                idDeleted:req.params.id,
+                productDeleted:deletedProduct
+            }
+        });
+    }
+    else{
+        res.status(404).json({
+            status:"not found",
+        });
+    }
+});
 
-exports.updateProductById=async(req,res)=> {
+exports.updateProductById=catchAsync( async(req,res)=> {
     
-    const foundProduct= await Product.findByIdAndUpdate(req.params.id,req.body,{
+    const updatedProduct= await Product.findByIdAndUpdate(req.params.id,req.body,{
         new: true
     });
-    res.status(200).json({
-        status:"success",
-        data:{
-                idUpdated:req.params.id,
-                updatedProduct:foundProduct,
-            }
-    });
-
-}
+    if(updatedProduct){
+        res.status(200).json({
+            status:"success",
+            data:{
+                    idUpdated:req.params.id,
+                    updatedProduct:updatedProduct,
+                }
+        });
+    }
+    else{
+        res.status(404).json({
+            status:"not found",
+        });
+    }
+});
